@@ -5,7 +5,12 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Constraints\Length;
+
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 use App\Entity\Receta;
 use App\Repository\RecetaRepository;
@@ -14,11 +19,14 @@ use Doctrine\ORM\EntityManagerInterface;
 class RecetasController extends AbstractController
 {
     #[Route('/recetas', name: 'app_recetas', methods:["GET"])]
-    public function buscarTodas(RecetaRepository $repo): JsonResponse
+    public function buscarTodas(RecetaRepository $repo): Response
     {
         $receta = $repo->findAll();
+        return $this->render('recetas/index.html.twig', [ "controller_name" => "Hola, este es el indice de Recetas",
+        "recetas" => $receta
+    ]);
 
-        return $this->json($receta, Response::HTTP_OK);
+        //return $this->json($receta, Response::HTTP_OK);
     }
 
     #[ Route("/recetas", methods: ["POST"])]
@@ -33,13 +41,35 @@ class RecetasController extends AbstractController
         return new JsonResponse("Receta creada con id ".$receta->getId(), Response::HTTP_CREATED);
     }
 
-    #[ Route("/recetas/{idReceta}", methods: ["GET"])]
-    public function buscarReceta (RecetaRepository $repo ,int $idReceta): JsonResponse{
+    #[Route("/recetas/receta_crear", name: "recetas_crear", methods:["GET", "POST"])]
+    public function crearRecetaConFormulario(Request $request, EntityManagerInterface $emy): Response{
+        $receta = new Receta();
+
+        $fb = $this->createFormBuilder($receta);
+        $fb->add("nombre", TextType::class, ["constraints" => [new Length(["min" => 15, "max" => 30])]]);
+        $fb->add("texto", TextType::class);
+        $fb->add("guardar", SubmitType::class);
+        $formulario = $fb->getForm();
+
+        $formulario->handleRequest($request);
+
+        if ($formulario->isSubmitted() && $formulario->isValid()){
+            $receta = $formulario->getData();
+          return  $this->redirectToRoute("app_recetas");
+        }else {
+            return $this->render("recetas/receta_crear.html.twig", ["formulario" => $formulario]);
+        }
+
+    }
+
+    #[ Route("/recetas/{idReceta}", name : "recetas_detalle", methods: ["GET"])]
+    public function buscarReceta (RecetaRepository $repo ,int $idReceta): Response{
         $receta = $repo->find($idReceta);
         if($receta==null){
             return $this->json("Receta no encontrada", Response::HTTP_NOT_FOUND);
         }
-        return $this->json($receta , Response::HTTP_OK);
+        return $this->render("recetas/receta.html.twig", [ "receta" => $receta ]);
+        //return $this->json($receta , Response::HTTP_OK);
     }
 
     #[ Route("/recetas/{idReceta}", methods:["PATCH"])]

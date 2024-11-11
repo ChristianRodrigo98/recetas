@@ -9,15 +9,9 @@
 </style>
 
 <div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    <h1>Creando nueva receta ✅</h1>
 
-    Listado de recetas:
-    {% for receta in recetas %}
-    <ul>
-        
-            <a href="{{ path('recetas_detalle', { idReceta: receta.getId() })}}"> {{receta.getNombre()}} </a>
-       
-    </ul>
-     {% endfor %}
+    <hr>
+    {{ form(formulario) }}
 </div>
 {% endblock %}

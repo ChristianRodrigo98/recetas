@@ -9,15 +9,12 @@
 </style>
 
 <div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    <h1>Hello {{ receta.getNombre() }}! ✅</h1>
 
-    Listado de recetas:
-    {% for receta in recetas %}
+    This friendly message is coming from:
     <ul>
-        
-            <a href="{{ path('recetas_detalle', { idReceta: receta.getId() })}}"> {{receta.getNombre()}} </a>
-       
+        <li>Your controller at <code>C:/Symfony/recetas/src/Controller/RecetasController.php</code></li>
+        <li>Your template at <code>C:/Symfony/recetas/templates/recetas/receta.html.twig</code></li>
     </ul>
-     {% endfor %}
 </div>
 {% endblock %}
